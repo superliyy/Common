@@ -1,0 +1,6 @@
+.dialog
+  el-dialog(:title="dialog.title" :visible.sync="dialog.visible" @close="closeFuc" width="30%" size="small")
+    filter-page(:filterConfig="dialogConfig" :formObj="formObj" ref="filter" :inline="false")
+    div(slot="footer" class="dialog-footer")
+      el-button(@click.stop="closeFuc" size="small") 取消
+      el-button(type="primary"  @click.stop.prevent="confirmDialogFuc" size="small") 确定

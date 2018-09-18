@@ -1,0 +1,59 @@
+.table
+  el-table(:data="dataSource" stripe border v-loading="loading" @selection-change="handleSelectionChange")
+    //- 表格前选择框
+    el-table-column(v-if="isSelectColumn" type="selection" width="55")
+    
+    template(v-for="column,index in tableConfig")
+      //- 表头的列合并
+      template(v-if="column.child")
+        el-table-column( :key="index" :prop="column.prop" :label="column.label" :width="column.width" :min-width="column.minWidth" :formatter="column.formatter")
+          template(v-for="column1,index1 in column.child")
+            el-table-column(:prop="column1.prop" :key="index1" :label="column1.label" :width="column1.width" :min-width="column1.minWidth" :formatter="column1.formatter")
+              template(slot-scope="scope")
+                //- 拼接内容
+                div(v-if="column1.render" v-html="renderHTML(scope.row,column1)")
+                //- 直接文字显示
+                div(v-else) {{scope.row[column1.prop]}}
+
+      //- 表头的列不合并
+      template(v-else)
+        //- 操作按钮
+        el-table-column(v-if="column.type==='button'" :fixed="column.btnArray?'right':false" :prop="column.prop" :label="column.label" :width="column.width" :min-width="column.minWidth" :formatter="column.formatter")
+          template(slot-scope="scope")
+            el-button(v-if="column.btnArray && btn.show" size="small" v-for="btn,btnIndex in column.btnArray" :key="btnIndex" type="text" @click.stop.prevent="btn.click(scope.row,$parent.list)") {{btn.label}}
+            span(v-if="column.click" @click.stop.prevent="column.click(scope.row)")
+              el-tag( key="btn" type="default" size="small") {{scope.row[column.prop] || 0}}            
+        //- 下拉框的
+        el-table-column(v-else-if="column.type==='select'" :prop="column.prop" :label="column.label" :min-width="column.minWidth")
+          template(slot-scope="scope")
+            el-select(v-model="scope.row.lid" size="small")
+              el-option(v-for="item in column.content" :key="item.id" :label="item.name" :value="item.id")
+        //- swich
+        el-table-column(v-else-if="column.type==='switch'" :prop="column.prop" :label="column.label" :min-width="column.minWidth")
+          template(slot-scope="scope")
+            el-switch(v-model="scope.row.lock" active-color="#66b3ff" inactive-color="#ccc" on-value="ON" off-value="OFF" active-value="1" inactive-value="0")
+
+        //- 文字显示
+        el-table-column(v-else :prop="column.prop" :label="column.label" :width="column.width" :min-width="column.minWidth" :formatter="column.formatter" :sortable="column.sortable?column.sortable:false")                
+          template(slot-scope="scope")
+            //- 拼接内容
+            div(v-if="column.render" v-html="renderHTML(scope.row,column)")
+              
+            //- 直接文字显示
+            div(v-else) {{scope.row[column.prop]}}
+
+  //- 分页控制-默认是显示的
+  el-pagination(
+    v-if="paginationShow"
+    @size-change="handleSizeChange"
+    @current-change="handleCurrentChange"
+    :current-page="filter.page"
+    :page-size="filter.page_size"
+    :page-sizes="[10, 20, 30, 50, 100, 200]"
+    layout="total, sizes, prev, pager, next, jumper"
+    :total="300"
+    background
+  )
+      
+        
+

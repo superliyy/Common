@@ -1,0 +1,55 @@
+.filter1
+  el-form(:model="formObj" ref="form" :label-position="inline?'left':'right'" :label-width="inline?'':'110px'" size="small" :inline="inline")
+    template(v-for="item,index in filterConfig")
+      
+      //- input
+      el-form-item(v-if="item.type==='input'" :label="item.label" :prop="item.prop" :rules="item.rules" :style="{'paddingLeft': item.label.length?'20px':'0'}")
+        el-input(v-model="formObj[item.prop]" :placeholder="item.placeholder")
+      
+      //- textarea
+      el-form-item(v-else-if="item.type==='textarea'" :label="item.label" :prop="item.prop" :rules="item.rules")
+        el-input(type="textarea" v-model="formObj[item.prop]" :placeholder="item.placeholder")
+
+      //- date
+      el-form-item(v-else-if="item.type==='date'" :label="item.label")
+        el-col(:span="11")
+          el-form-item(:prop="item.children[0].prop" :rules="item.children[0].rules")
+            el-date-picker(type="date" :placeholder="item.children[0].placeholder" v-model="formObj[item.children[0].prop]"  :value-format="item.valueFormat")
+        el-col(class="line" :span="2" style="text-align:center") -
+        el-col(:span="11")
+          el-form-item(:prop="item.children[1].prop" :rules="item.children[1].rules")
+            el-date-picker(type="date" :placeholder="item.children[1].placeholder" v-model="formObj[item.children[1].prop]"  :value-format="item.valueFormat")
+      
+      //- number
+      el-form-item(v-else-if="item.type==='number'" :label="item.label" :prop="item.prop" :rules="item.rules")
+        el-input(type="number" v-model="formObj[item.prop]" :placeholder="item.placeholder")
+
+      //- numberGroup
+      el-form-item(v-else-if="item.type==='numberGroup'" :label="item.label" :prop="item.children[0].prop" :rules="item.children[0].rules")
+        el-col(:span="11")
+          el-form-item(:prop="item.children[0].prop" :rules="item.children[0].rules")
+            el-input(type="number" min="0" v-model="formObj[item.children[0].prop]")
+        el-col(class="line" :span="2" style="text-align:center") -
+        el-col(:span="11")
+          el-form-item(:prop="item.children[1].prop" :rules="item.children[1].rules")
+            el-input(type="number" min="0" v-model="formObj[item.children[1].prop]")
+
+      //- select
+      el-form-item(v-else-if="item.type==='select'" :label="item.label" :prop="item.prop" :rules="item.rules")
+        el-select(v-model="formObj[item.prop]" placeholder="请选择" @change="changeSelect")
+          el-option(v-for="opts in item.option" :key="opts.value" :label="opts.label" :value="opts.value")
+
+
+      //- 弹框的按钮
+      el-form-item(v-else-if="item.type==='buttonGroup'")
+        template(v-for="btn,index in item.children")
+          //- 刷新的下拉框
+          template(v-if="btn.type==='select'")
+            el-select( v-model="btn.value" @change="doFilterAction(btn.event,btn.value)")
+              el-option(v-for="opts in btn.option" :key="opts.value" :label="opts.label" :value="opts.value")
+            span(v-if="btn.value!==''") 刷新一次
+          //- 其他按钮 如：查询，重置，导出
+          el-button(v-else @click.stop.prevent="doFilterAction(btn.event)") {{btn.label}}
+          
+        
+      
